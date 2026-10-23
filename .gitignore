@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+config.toml
+data/
+incoming/
+set_aside/
+.scratch/

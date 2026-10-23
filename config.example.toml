@@ -1,0 +1,114 @@
+# Copy to config.toml, which is never committed, then fill it in.
+# An empty value is asked for by the skill that needs it.
+
+[general]
+# Language the skills talk to you in, as an ISO 639-1 code.
+conversation_language = 'en'
+
+[data]
+# Folder of the Corrections, Wanted lists, Ignored items, Accepted deviations, Grabbed items and caches, relative to the repository or absolute.
+folder = 'data'
+
+[set_aside]
+# Single folder, outside the Roots, where Set aside files go, sorted by Type, relative to the repository or absolute.
+folder = 'set_aside'
+
+[ignored]
+# Names of files or folders ignored everywhere, on top of those starting with a dot.
+names = []
+
+# One section per Type: the Root of the library and the Incoming folder of downloads, relative to the repository or absolute.
+# The Incoming folder is created when needed.
+# Video Types also set their languages, as ISO 639-1 codes:
+# title_language for the Localized title, audio_language ('original' for the original audio)
+# and subtitle_language (empty for none) for the Preferred language.
+# release_keywords replaces the built-in Release keywords of the subtitle language, for example ['SUBITA'].
+
+[anime]
+root = ''
+incoming = 'incoming/anime'
+title_language = 'en'
+audio_language = 'original'
+subtitle_language = 'en'
+
+[show]
+root = ''
+incoming = 'incoming/show'
+title_language = 'en'
+audio_language = 'en'
+subtitle_language = ''
+
+[movie]
+root = ''
+incoming = 'incoming/movie'
+title_language = 'en'
+audio_language = 'en'
+subtitle_language = ''
+
+[manga]
+root = ''
+incoming = 'incoming/manga'
+
+[book]
+root = ''
+incoming = 'incoming/book'
+
+[music]
+root = ''
+incoming = 'incoming/music'
+# Minimum share, in percent, of the tracks of an Album present to suggest the others.
+album_threshold = 50
+# Minimum number of Tracks of an Artist in the Root to suggest their popular Tracks.
+min_artist = 3
+
+[tmdb]
+# Free API v3 key: themoviedb.org, Settings, API.
+key = ''
+
+[mal]
+# MyAnimeList Client ID: https://myanimelist.net/apiconfig, App Type other.
+client_id = ''
+
+[google_books]
+# Optional key, Google Cloud console, Books API. Without it, the API soon refuses repeated calls.
+key = ''
+
+[spotify]
+# Client ID of an app on https://developer.spotify.com/dashboard with Web API and the URI http://127.0.0.1:<port>/callback.
+client_id = ''
+port = 8888
+# Liked songs taken into account.
+likes = true
+# Playlists created by you taken into account, by name. Empty: all of them.
+playlists = []
+# Country of the popular Tracks suggested by /jb-music-find-missing-artist, as an ISO 3166-1 code.
+market = 'US'
+
+[lastfm]
+# Free API key: https://www.last.fm/api/account/create, for the new Tracks suggested.
+key = ''
+
+[prowlarr]
+url = 'http://localhost:9696'
+# Settings, General, API Key.
+key = ''
+# Indexers whose Releases are marked Trusted, by their name in Prowlarr.
+trusted_indexers = ['Nyaa.si Trusted']
+
+[qbittorrent]
+url = 'http://localhost:8080'
+# Empty when the web UI requires no authentication for localhost.
+user = ''
+password = ''
+category = 'jb-anime'
+
+[slskd]
+url = 'http://localhost:5030'
+# API key declared in slskd.yml.
+key = ''
+
+[jellyfin]
+# Optional: without a URL, the skills remind you to start the library scan by hand.
+url = ''
+# Dashboard, API Keys.
+key = ''
