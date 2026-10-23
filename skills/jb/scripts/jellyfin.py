@@ -1,9 +1,13 @@
+import json
 import re
 import sys
+import urllib.parse
 import urllib.request
 from functools import cache
 
 import config
+
+BATCH = 100
 
 VIDEOS = {
     ".mp4", ".mkv", ".avi", ".m4v", ".mov", ".wmv", ".ts", ".m2ts", ".webm",
@@ -91,22 +95,62 @@ def companions(video):
 
 
 
+def call(method, path, body=None, **params):
+    url = f"{config.value('jellyfin', 'url').rstrip('/')}/{path.lstrip('/')}"
+    if params:
+        url += "?" + urllib.parse.urlencode(params)
+    headers = {"Authorization": f'MediaBrowser Token="{config.value("jellyfin", "key")}"', "Content-Type": "application/json"}
+    data = json.dumps(body).encode() if body is not None else (b"" if method == "POST" else None)
+    with urllib.request.urlopen(urllib.request.Request(url, data, headers, method=method), timeout=120) as response:
+        text = response.read()
+    return json.loads(text) if text else None
+
+
 def scanner():
-    url = config.optional("jellyfin", "url")
-    if not url:
+    if not config.optional("jellyfin", "url"):
         print("jellyfin.url missing from the config: start the library scan in Jellyfin")
         return
-    query = urllib.request.Request(f"{url.rstrip('/')}/Library/Refresh", b"", {"Authorization": f'MediaBrowser Token="{config.value("jellyfin", "key")}"'}, method="POST")
-    with urllib.request.urlopen(query, timeout=30):
-        pass
+    call("POST", "Library/Refresh")
     print("Jellyfin library scan started.")
 
 
+def owner():
+    users = call("GET", "Users")
+    name = config.optional("jellyfin", "user")
+    if name:
+        found_items = [u for u in users if u["Name"].casefold() == name.casefold()]
+        if not found_items:
+            raise SystemExit(f"Jellyfin user not found: {name}")
+        return found_items[0]["Id"]
+    return next((u for u in users if u["Policy"].get("IsAdministrator")), users[0])["Id"]
+
+
+def playlist():
+    if not config.optional("jellyfin", "url"):
+        print("jellyfin.url missing from the config: update the playlist in Jellyfin by hand")
+        return
+    name = config.value("jellyfin", "playlist", "Finamp")
+    user = owner()
+    tracks = [i["Id"] for i in call("GET", "Items", userId=user, IncludeItemTypes="Audio", Recursive="true", SortBy="SortName")["Items"]]
+    found_items = [p for p in call("GET", "Items", userId=user, IncludeItemTypes="Playlist", Recursive="true")["Items"] if p["Name"] == name]
+    if not found_items:
+        identifier = call("POST", "Playlists", {"Name": name, "UserId": user, "MediaType": "Audio", "Ids": []})["Id"]
+        present = set()
+    else:
+        identifier = found_items[0]["Id"]
+        present = {i["Id"] for i in call("GET", f"Playlists/{identifier}/Items", userId=user)["Items"]}
+    to_add = [t for t in tracks if t not in present]
+    for start in range(0, len(to_add), BATCH):
+        call("POST", f"Playlists/{identifier}/Items", userId=user, ids=",".join(to_add[start:start + BATCH]))
+    print(f"Playlist {name}: {len(to_add)} Track(s) added, {len(present) + len(to_add)} in total")
+
+
 def main():
-    if sys.argv[1:] != ["scan"]:
-        print("usage: jellyfin.py scan")
+    commands = {"scan": scanner, "playlist": playlist}
+    if len(sys.argv) != 2 or sys.argv[1] not in commands:
+        print("usage: jellyfin.py scan | playlist")
         sys.exit(2)
-    scanner()
+    commands[sys.argv[1]]()
 
 
 if __name__ == "__main__":

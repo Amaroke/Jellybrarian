@@ -15,7 +15,7 @@ Each Type (`anime`, `show`, `movie`, `manga`, `book`, `music`) has a Root, where
 | `/jb-anime-download` | Searches the Wanted list on Prowlarr with the chosen subtitles and sends it to qBittorrent. |
 | `/jb-music-migrate-spotify` | Lists the Spotify Tracks left to migrate to the Root and writes them to the Wanted list. |
 | `/jb-music-find-missing-album`, `-artist`, `/jb-music-find-new-song` | Suggest Tracks: nearly complete Albums, popular tracks of an Artist, close Tracks through Last.fm. |
-| `/jb-music-download` | Searches the Wanted list in FLAC on Soulseek, in batches, and sends it to slskd. |
+| `/jb-music-download` | Searches the Wanted list in FLAC on Soulseek, in batches, sends it to slskd, then fills the Jellyfin playlist `jellyfin.playlist` with every Track. |
 
 Music has no `find-missing`: its four migration and Suggestion skills replace it.
 
