@@ -65,6 +65,10 @@ In the progress, write `step` at each change of step, and what the procedure sav
 
 Ask questions in batches of at most 10 Works, numbered, each with its default answer. Save the answers of a batch in the progress before moving to the next one.
 
+## Long runs
+
+A script run in the background (online check, search, identification) is followed by a monitor that reads its last progress line every 5 minutes. Give the user each of these points in one line (`Search: 40/97`), until the script ends or fails.
+
 ## Long lists
 
 Beyond about a hundred lines, write the list to a file in the scratchpad, give its path and summarise by Work.
