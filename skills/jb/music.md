@@ -34,7 +34,7 @@ Jellyfin builds its Music library from the file tags only. Rename rewrites them 
 
 - title, artists (one value per artist), album artist, Album, track number, release date,
 - MusicBrainz identifiers of the recording, the release, the release group, the artists and the album artists,
-- the artwork of the release, embedded in the file, taken from Cover Art Archive.
+- the artwork, embedded in the file, searched in this order: Cover Art Archive for the release, then its release group, then the other releases holding the recording, then Deezer and the iTunes Search API by artist and title (same title without its parentheses, one of the artists of the Track). When none is found, the artwork already embedded is kept.
 
 ## Sidecar files
 
