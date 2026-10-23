@@ -164,7 +164,9 @@ python <scripts>/music_releases.py grab <batch number>
 
 Each Track goes into the slskd queue and becomes Grabbed, which the check uses to recognise the file. When the search is finished and every batch grabbed, the script deletes the progress.
 
-**Playlist**: at the end of the download, even when nothing was grabbed, add every Track of the Jellyfin library to the playlist `jellyfin.playlist` (`Finamp` by default), created when missing:
+## Move
+
+After the Jellyfin scan of the move, add every Track of the library to the playlist `jellyfin.playlist` (`Finamp` by default), created when missing. The script waits for the end of the scan, 30 minutes at most:
 
 ```
 python <scripts>/jellyfin.py playlist

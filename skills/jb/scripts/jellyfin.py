@@ -1,6 +1,7 @@
 import json
 import re
 import sys
+import time
 import urllib.parse
 import urllib.request
 from functools import cache
@@ -8,6 +9,7 @@ from functools import cache
 import config
 
 BATCH = 100
+SCAN_TIMEOUT = 1800
 
 VIDEOS = {
     ".mp4", ".mkv", ".avi", ".m4v", ".mov", ".wmv", ".ts", ".m2ts", ".webm",
@@ -125,10 +127,21 @@ def owner():
     return next((u for u in users if u["Policy"].get("IsAdministrator")), users[0])["Id"]
 
 
+def wait_for_scan():
+    deadline = time.monotonic() + SCAN_TIMEOUT
+    while time.monotonic() < deadline:
+        task = next((t for t in call("GET", "ScheduledTasks") if t.get("Key") == "RefreshLibrary"), None)
+        if not task or task["State"] == "Idle":
+            return
+        time.sleep(10)
+    print("The Jellyfin library scan is still running: the newest Tracks may be missing from the playlist")
+
+
 def playlist():
     if not config.optional("jellyfin", "url"):
         print("jellyfin.url missing from the config: update the playlist in Jellyfin by hand")
         return
+    wait_for_scan()
     name = config.value("jellyfin", "playlist", "Finamp")
     user = owner()
     tracks = [i["Id"] for i in call("GET", "Items", userId=user, IncludeItemTypes="Audio", Recursive="true", SortBy="SortName")["Items"]]

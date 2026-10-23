@@ -112,7 +112,7 @@ key = ''
 url = ''
 # Dashboard, API Keys.
 key = ''
-# Music playlist that /jb-music-download fills with every Track of the library.
+# Music playlist that /jb-music-move fills with every Track of the library.
 playlist = 'Finamp'
 # User who owns that playlist, by name. Empty: the first administrator.
 user = ''

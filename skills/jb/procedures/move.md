@@ -31,4 +31,4 @@ python <scripts>/mover.py <type> --apply
 
 The script moves each file with its companions, then deletes the emptied subfolders of the Incoming folder. A locked file does not stop the others: ask the user to release it, then run step 3 again.
 
-Report the folders kept and the Works left. Start the Jellyfin scan as in [workflow.md](../workflow.md#jellyfin). Release the lock. Finish with the next command: `/jb-<type>-find-missing`.
+Report the folders kept and the Works left. Start the Jellyfin scan as in [workflow.md](../workflow.md#jellyfin), then follow the Move section of `<type>.md` when it has one. Release the lock. Finish with the next command: `/jb-<type>-find-missing`.
