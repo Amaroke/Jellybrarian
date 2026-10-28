@@ -1,4 +1,5 @@
 import re
+import sys
 import urllib.error
 from pathlib import Path
 
@@ -20,7 +21,7 @@ def busy():
 def unfold(root):
     root = Path(root).resolve()
     active = busy()
-    released, in_progress, blocked = [], [], []
+    released, in_progress, blocked, locked = [], [], [], []
     for media in sorted(d for d in root.iterdir() if d.is_dir()):
         for span in sorted(d for d in media.iterdir() if d.is_dir() and SPAN.match(d.name)):
             if any(p == span or span in p.parents for p in active):
@@ -31,18 +32,23 @@ def unfold(root):
                 if target.exists():
                     blocked.append(file.relative_to(root))
                     continue
-                file.rename(target)
+                try:
+                    file.rename(target)
+                except PermissionError:
+                    locked.append(file.relative_to(root))
+                    continue
                 released.append(target.relative_to(root))
             for folder in sorted((d for d in span.rglob("*") if d.is_dir()), key=lambda d: len(d.parts), reverse=True) + [span]:
                 if not any(folder.iterdir()):
                     folder.rmdir()
-    return released, in_progress, blocked
+    return released, in_progress, blocked, locked
 
 
 def main():
-    released, in_progress, blocked = unfold(config.folder("anime", "incoming"))
+    target = sys.argv[1] if len(sys.argv) > 1 else "incoming"
+    released, in_progress, blocked, locked = unfold(config.folder("anime", target))
     print(f"Moved out of range folders: {len(released)}")
-    for title, catalog in (("Still in qBittorrent:", in_progress), ("Name already taken, left in place:", blocked)):
+    for title, catalog in (("Still in qBittorrent:", in_progress), ("Name already taken, left in place:", blocked), ("Locked by another program, left in place:", locked)):
         if catalog:
             print(title)
             print("\n".join(f"  {c}" for c in catalog))

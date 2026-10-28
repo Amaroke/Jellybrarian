@@ -13,7 +13,7 @@ Convention of the Anime Root, on top of [common.md](common.md) and [videos.md](v
 `/jb-anime-download` puts each Release in a range folder (`S04E25`, `S03`, `S02E01 to S02E12`) under the folder of its Anime. Move the files out of it:
 
 ```
-python <scripts>/unfold.py
+python <scripts>/unfold.py [mal]
 ```
 
 Each file goes up into the folder of its Anime, then the emptied folders are deleted. A range folder still used by a qBittorrent torrent is left as is, as is a file whose name is already taken: the script lists them, pass them on. For the Root, nothing to do.
@@ -94,3 +94,12 @@ python <scripts>/releases.py grab
 ```
 
 Each Release goes into the qBittorrent category of the config, which removes it as soon as the download is done, and becomes Grabbed. The script deletes the progress.
+
+## MAL download
+
+`/jb-anime-mal-download` fills a folder the user chooses from a MyAnimeList list, outside the Root:
+
+- **Entries**: each entry of the list on its own, never its franchise. Its season and Episode numbers still follow the whole franchise: a third season goes to `Season 03`, a Movie, an OVA or a special to season 00. An entry not aired yet is skipped, one still airing only brings the Episodes already released.
+- **Already there**: Episodes already filed in the chosen folder are skipped. The Root, the Wanted list, the Ignored and Grabbed items are not read, and the grabs are not added to the Grabbed items.
+- **Releases**: the same criteria and choice as the Download section. A season 00 entry takes the best Release whose title holds one of its MAL titles.
+- **Rename**: the convention of this file applies, To convert files are not reported.

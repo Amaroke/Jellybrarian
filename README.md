@@ -13,6 +13,7 @@ Each Type (`anime`, `show`, `movie`, `manga`, `book`, `music`) has a Root, where
 | `/jb-<type>-move` | Moves the Incoming folder into the Root and starts the Jellyfin scan. For Music, then fills the playlist `jellyfin.playlist` with every Track. |
 | `/jb-<type>-find-missing` | Searches for the Missing items and Follow-ups of the Root, asks which ones to ignore and writes the Wanted list. |
 | `/jb-anime-download` | Searches the Wanted list on Prowlarr with the chosen subtitles and sends it to qBittorrent. |
+| `/jb-anime-mal-download` | Downloads a MyAnimeList list into a folder you choose, then checks and renames it there. |
 | `/jb-music-migrate-spotify` | Lists the Spotify Tracks left to migrate to the Root and writes them to the Wanted list. |
 | `/jb-music-find-missing-album`, `-artist`, `/jb-music-find-new-song` | Suggest Tracks: nearly complete Albums, popular tracks of an Artist, close Tracks through Last.fm. |
 | `/jb-music-download` | Searches the Wanted list in FLAC on Soulseek, in batches, and sends it to slskd. |

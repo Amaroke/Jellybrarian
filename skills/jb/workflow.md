@@ -16,6 +16,8 @@ Questions, summaries and reports are in that language. Script output, file names
 
 `check` and `rename` take an optional argument, `incoming` (default) or `root`: the Incoming folder or the Root of the Type, read from the config. `move` always goes from the Incoming folder to the Root, `find-missing` and `download` work on the Root. No skill accepts a path.
 
+The Anime target `mal` is the folder the user chose for the last `/jb-anime-mal-download`, which asks for it at each run.
+
 ## Config
 
 Scripts read `config.toml` at the root of the repository. A script that exits with code 3 names the missing key:

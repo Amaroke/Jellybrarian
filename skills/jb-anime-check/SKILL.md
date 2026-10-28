@@ -2,7 +2,7 @@
 name: jb-anime-check
 description: Checks the Incoming folder or the Root of the Animes against the convention, asks the questions and writes the Corrections that /jb-anime-rename will apply. Changes nothing else on disk.
 disable-model-invocation: true
-argument-hint: "[incoming|root]"
+argument-hint: "[incoming|root|mal]"
 ---
 
 # jb anime check

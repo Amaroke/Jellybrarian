@@ -112,7 +112,7 @@ def queries(season, base):
     return list(dict.fromkeys(t for title in titles for t in (title, *(f"{title} {tag}" for tag in tags))))
 
 
-def cover_span(media, season, missing, seasons, base, folder):
+def cover_span(media, season, missing, seasons, base, folder, destination=None):
     candidates = {}
     for query in queries(season, base):
         for release in prowlarr.search(query):
@@ -132,7 +132,7 @@ def cover_span(media, season, missing, seasons, base, folder):
             "group": span_label(season.number, numbers, complete),
             "elements": [f"{media} : S{season.number:02d}E{e:02d}" for e in sorted(numbers)],
             "release": release,
-            "path": str(qbittorrent.incoming() / name_on(folder) / name_on(span_label(season.number, numbers, complete))),
+            "path": str((destination or qbittorrent.incoming()) / name_on(folder) / name_on(span_label(season.number, numbers, complete))),
         })
         remaining -= numbers
     choice.sort(key=lambda c: c["elements"][0])
