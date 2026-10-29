@@ -34,7 +34,7 @@ Jellyfin builds its Music library from the file tags only. Rename rewrites them 
 
 - title, artists (one value per artist), album artist, Album, track number, release date,
 - MusicBrainz identifiers of the recording, the release, the release group, the artists and the album artists,
-- the artwork of the release, embedded in the file, taken from Cover Art Archive.
+- the artwork, embedded in the file, searched in this order: Cover Art Archive for the release, then its release group, then the other releases holding the recording, then Deezer and the iTunes Search API by artist and title (same title without its parentheses, one of the artists of the Track). When none is found, the artwork already embedded is kept.
 
 ## Sidecar files
 
@@ -163,3 +163,11 @@ python <scripts>/music_releases.py grab <batch number>
 ```
 
 Each Track goes into the slskd queue and becomes Grabbed, which the check uses to recognise the file. When the search is finished and every batch grabbed, the script deletes the progress.
+
+## Move
+
+After the Jellyfin scan of the move, add every Track of the library to the playlist `jellyfin.playlist` (`Finamp` by default), created when missing. The script waits for the end of the scan, 30 minutes at most:
+
+```
+python <scripts>/jellyfin.py playlist
+```

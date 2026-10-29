@@ -16,6 +16,8 @@ Questions, summaries and reports are in that language. Script output, file names
 
 `check` and `rename` take an optional argument, `incoming` (default) or `root`: the Incoming folder or the Root of the Type, read from the config. `move` always goes from the Incoming folder to the Root, `find-missing` and `download` work on the Root. No skill accepts a path.
 
+The Anime target `mal` is the folder the user chose for the last `/jb-anime-mal-download`, which asks for it at each run.
+
 ## Config
 
 Scripts read `config.toml` at the root of the repository. A script that exits with code 3 names the missing key:
@@ -64,6 +66,10 @@ In the progress, write `step` at each change of step, and what the procedure sav
 ## Questions
 
 Ask questions in batches of at most 10 Works, numbered, each with its default answer. Save the answers of a batch in the progress before moving to the next one.
+
+## Long runs
+
+A script run in the background (online check, search, identification) is followed by a monitor that reads its last progress line every 5 minutes. Give the user each of these points in one line (`Search: 40/97`), until the script ends or fails.
 
 ## Long lists
 

@@ -1,4 +1,5 @@
 import argparse
+import json
 import re
 import sys
 import tomllib
@@ -7,7 +8,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[3]
 FILE = REPO / "config.toml"
 TYPES = ("anime", "show", "movie", "manga", "book", "music")
-TARGETS = ("incoming", "root")
+TARGETS = ("incoming", "root", "mal")
 SECRETS = {
     ("tmdb", "key"),
     ("mal", "client_id"),
@@ -58,8 +59,19 @@ def absolute(text):
     return path if path.is_absolute() else REPO / path
 
 
+def mal_folder(type_):
+    return data_folder() / type_ / "mal_folder.json"
+
+
 def folder(type_, target):
-    path = absolute(value(type_, target))
+    if target == "mal":
+        file = mal_folder(type_)
+        if not file.is_file():
+            print(f"No destination folder chosen for {type_}: run /jb-{type_}-mal-download")
+            sys.exit(2)
+        path = Path(json.loads(file.read_text(encoding="utf-8"))["folder"])
+    else:
+        path = absolute(value(type_, target))
     if target == "incoming":
         path.mkdir(parents=True, exist_ok=True)
     if not path.is_dir():

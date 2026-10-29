@@ -4,8 +4,10 @@ import re
 import sys
 import unicodedata
 import urllib.error
+import urllib.parse
 import urllib.request
 
+import api
 import config
 import storage
 import jellyfin
@@ -250,24 +252,54 @@ def flaws(file, mbid, f):
     return found_items
 
 
-def artwork(f):
-    for url in (f"https://coverartarchive.org/release/{f['album_mbid']}/front-1200", f"https://coverartarchive.org/release-group/{f['group_mbid']}/front-1200"):
-        if "None" in url:
-            continue
-        try:
-            query = urllib.request.Request(url, headers={"User-Agent": musicbrainz.AGENT})
-            with urllib.request.urlopen(query, timeout=60) as response:
-                return response.read(), response.headers.get_content_type()
-        except (urllib.error.URLError, TimeoutError):
-            continue
-    return None
+def download(url):
+    try:
+        query = urllib.request.Request(url, headers={"User-Agent": musicbrainz.AGENT})
+        with urllib.request.urlopen(query, timeout=60) as response:
+            return response.read(), response.headers.get_content_type()
+    except (urllib.error.URLError, TimeoutError):
+        return None
+
+
+def search_key(text):
+    folded = unicodedata.normalize("NFKD", (text or "").replace("œ", "oe").replace("Œ", "OE").replace("ø", "o").replace("Ø", "O"))
+    return musicbrainz.key(re.sub(r"\s*[(\[].*?[)\]]", "", folded) or folded)
+
+
+def same_track(f, artist, title):
+    return search_key(title) == search_key(title_of(f)) and any(search_key(artist).startswith(search_key(n)) for _, n in f["artists"])
+
+
+def store_covers(f):
+    query = f"{f['artists'][0][1]} {re.sub(r'[(\[].*?[)\]]', '', title_of(f)).strip()}"
+    try:
+        deezer = api.read("https://api.deezer.com/search?" + urllib.parse.urlencode({"q": query})) or {}
+        yield from (x["album"]["cover_xl"] for x in deezer.get("data") or [] if same_track(f, x["artist"]["name"], x["title"]))
+        itunes = api.read("https://itunes.apple.com/search?" + urllib.parse.urlencode({"term": query, "entity": "song", "limit": 10})) or {}
+        yield from (x["artworkUrl100"].replace("100x100bb", "1200x1200bb") for x in itunes.get("results") or [] if same_track(f, x["artistName"], x["trackName"]))
+    except Exception:
+        return
+
+
+def covers(mbid, f):
+    for kind, identifier in (("release", f["album_mbid"]), ("release-group", f["group_mbid"])):
+        if identifier:
+            yield f"https://coverartarchive.org/{kind}/{identifier}/front-1200"
+    recording = musicbrainz.get(f"recording/{mbid}", inc="releases") or {}
+    yield from (f"https://coverartarchive.org/release/{r['id']}/front-1200" for r in recording.get("releases") or [] if r["id"] != f["album_mbid"])
+    yield from store_covers(f)
+
+
+def artwork(mbid, f):
+    return next((image for image in map(download, covers(mbid, f)) if image), None)
 
 
 def write(file, mbid, f):
     desired_values = expected_values(mbid, f)
-    image = artwork(f)
+    image = artwork(mbid, f)
     if file.suffix.lower() == ".flac":
         audio = FLAC(file)
+        kept = audio.pictures
         audio.delete()
         audio.clear_pictures()
         for k, v in desired_values.items():
@@ -276,16 +308,25 @@ def write(file, mbid, f):
             p = Picture()
             p.type, p.data, p.mime = 3, image[0], image[1]
             audio.add_picture(p)
+        else:
+            for p in kept:
+                audio.add_picture(p)
         audio.save()
     elif file.suffix.lower() == ".mp3":
+        try:
+            kept = ID3(file).getall("APIC")
+        except Exception:
+            kept = []
         ID3().save(file)
         audio = EasyID3(file)
         for k, v in desired_values.items():
             audio[k] = v
         audio.save()
-        if image:
+        pictures = [APIC(encoding=3, mime=image[1], type=3, desc="", data=image[0])] if image else kept
+        if pictures:
             id3 = ID3(file)
-            id3.add(APIC(encoding=3, mime=image[1], type=3, desc="", data=image[0]))
+            for p in pictures:
+                id3.add(p)
             id3.save()
 
 
